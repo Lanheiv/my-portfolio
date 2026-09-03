@@ -107,7 +107,7 @@ export default function Home() {
         alt="Projekts 1"
         className="mb-5 h-60 w-full rounded-lg object-cover"
       />
-
+ 
       <h3 className="text-2xl font-bold text-blue-700">Sky-plane</h3>
 
       <p className="my-4 text-gray-400">

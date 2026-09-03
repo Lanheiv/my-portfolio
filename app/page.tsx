@@ -15,7 +15,7 @@ export default function Home() {
             colorNum={3.4}
             waveAmplitude={0.52}
             waveFrequency={2.3}
-            waveSpeed={0.01}
+            waveSpeed={0.15}
             backgroundColor={[0, 0, 0]}
           />
         </div>

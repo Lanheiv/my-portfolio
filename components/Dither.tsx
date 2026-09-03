@@ -77,8 +77,14 @@ float fbm(vec2 p) {
 }
 
 float pattern(vec2 p) {
-  vec2 p2 = p - time * waveSpeed;
-  return fbm(p + fbm(p2)); 
+  vec2 movement = vec2(
+    time * waveSpeed,
+    time * waveSpeed * 0.65
+  );
+
+  vec2 p2 = p - movement;
+
+  return fbm(p + fbm(p2));
 }
 
 void main() {
@@ -100,8 +106,10 @@ void main() {
 
 const ditherFragmentShader = `
 precision highp float;
+uniform vec2 resolution;
 uniform float colorNum;
 uniform float pixelSize;
+
 const float bayerMatrix8x8[64] = float[64](
   0.0/64.0, 48.0/64.0, 12.0/64.0, 60.0/64.0,  3.0/64.0, 51.0/64.0, 15.0/64.0, 63.0/64.0,
   32.0/64.0,16.0/64.0, 44.0/64.0, 28.0/64.0, 35.0/64.0,19.0/64.0, 47.0/64.0, 31.0/64.0,
@@ -137,33 +145,61 @@ void mainImage(in vec4 inputColor, in vec2 uv, out vec4 outputColor) {
 
 class RetroEffectImpl extends Effect {
   public uniforms: Map<string, THREE.Uniform<any>>;
+
   constructor() {
     const uniforms = new Map<string, THREE.Uniform<any>>([
       ['colorNum', new THREE.Uniform(4.0)],
-      ['pixelSize', new THREE.Uniform(2.0)]
+      ['pixelSize', new THREE.Uniform(2.0)],
+      ['resolution', new THREE.Uniform(new THREE.Vector2(1, 1))]
     ]);
+
     super('RetroEffect', ditherFragmentShader, { uniforms });
+
     this.uniforms = uniforms;
   }
+
   set colorNum(value: number) {
     this.uniforms.get('colorNum')!.value = value;
   }
-  get colorNum(): number {
-    return this.uniforms.get('colorNum')!.value;
-  }
+
   set pixelSize(value: number) {
     this.uniforms.get('pixelSize')!.value = value;
   }
-  get pixelSize(): number {
-    return this.uniforms.get('pixelSize')!.value;
+
+  set resolution(value: THREE.Vector2) {
+    this.uniforms.get('resolution')!.value.copy(value);
   }
 }
 
-const RetroEffect = forwardRef<RetroEffectImpl, { colorNum: number; pixelSize: number }>((props, ref) => {
-  const { colorNum, pixelSize } = props;
-  const WrappedRetroEffect = wrapEffect(RetroEffectImpl);
-  return <WrappedRetroEffect ref={ref} colorNum={colorNum} pixelSize={pixelSize} />;
-});
+const WrappedRetroEffect = wrapEffect(RetroEffectImpl);
+
+interface RetroEffectProps {
+  colorNum: number;
+  pixelSize: number;
+}
+
+function RetroEffect({ colorNum, pixelSize }: RetroEffectProps) {
+  const effectRef = useRef<RetroEffectImpl>(null);
+  const { size, gl } = useThree();
+
+  useEffect(() => {
+    const effect = effectRef.current;
+
+    if (!effect) return;
+
+    effect.colorNum = colorNum;
+    effect.pixelSize = pixelSize;
+
+    const dpr = gl.getPixelRatio();
+
+    effect.resolution = new THREE.Vector2(
+      size.width * dpr,
+      size.height * dpr
+    );
+  }, [colorNum, pixelSize, size, gl]);
+
+  return <WrappedRetroEffect ref={effectRef} />;
+}
 
 RetroEffect.displayName = 'RetroEffect';
 
@@ -212,7 +248,7 @@ function DitheredWaves({
 
   const waveUniformsRef = useRef<WaveUniforms>({
     time: new THREE.Uniform(0),
-    resolution: new THREE.Uniform(new THREE.Vector2(0, 0)),
+    resolution: new THREE.Uniform(new THREE.Vector2(1, 1)),
     waveSpeed: new THREE.Uniform(waveSpeed),
     waveFrequency: new THREE.Uniform(waveFrequency),
     waveAmplitude: new THREE.Uniform(waveAmplitude),

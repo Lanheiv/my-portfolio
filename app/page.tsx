@@ -96,7 +96,7 @@ export default function Home() {
       </section>
 
       <section className="px-6 py-20">
-  <h2 className="mb-10 text-4xl font-bold">Mani projekti</h2>
+  <h2 className="mb-10 text-4xl font-bold text-gray-300">Mani projekti</h2>
 
   <div className="grid gap-8 md:grid-cols-2">
 
@@ -116,7 +116,7 @@ export default function Home() {
 
       <div className="flex gap-4">
         <a
-          href="text-blue-700"
+          href="https://github.com/Lanheiv/Sky-plane"
           className="text-blue-700 hover:underline"
         >
           GitHub
@@ -139,17 +139,12 @@ export default function Home() {
 
       <div className="flex gap-4">
         <a
-          href="#"
+          href="https://github.com/Lanheiv/DropPod"
           className="text-blue-700 hover:underline"
         >
           GitHub
         </a>
 
-        <a
-          href="https://github.com/Lanheiv/DropPod"
-          className="text-blue-700 hover:underline"
-        >
-        </a>
       </div>
     </div>
 
